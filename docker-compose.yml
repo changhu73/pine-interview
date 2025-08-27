@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rate-limiter-1:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - PORT=8000
+    depends_on:
+      redis:
+        condition: service_healthy
+    command: python server.py --port 8000 --redis redis://redis:6379
+
+  rate-limiter-2:
+    build: .
+    ports:
+      - "8001:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - PORT=8000
+    depends_on:
+      redis:
+        condition: service_healthy
+    command: python server.py --port 8000 --redis redis://redis:6379
+
+  rate-limiter-3:
+    build: .
+    ports:
+      - "8002:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - PORT=8000
+    depends_on:
+      redis:
+        condition: service_healthy
+    command: python server.py --port 8000 --redis redis://redis:6379
+
+  rate-limiter-4:
+    build: .
+    ports:
+      - "8003:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - PORT=8000
+    depends_on:
+      redis:
+        condition: service_healthy
+    command: python server.py --port 8000 --redis redis://redis:6379
